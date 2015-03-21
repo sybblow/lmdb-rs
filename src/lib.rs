@@ -59,10 +59,49 @@ mod transaction;
 
 #[cfg(test)]
 mod test_utils {
+    use std;
 
     use std::fs;
+    use std::fs::{create_dir, remove_dir_all};
+    use std::path::{Path, PathBuf, AsPath};
+    use rand::{thread_rng, Rng};
 
     use super::*;
+
+    struct MyTempDir {
+        path: Option<PathBuf>,
+    }
+
+    impl MyTempDir {
+        pub fn new() -> std::io::Result<MyTempDir> {
+            let mut path = PathBuf::new("/tmp/lmdb_tmpfs");
+            let s: String = thread_rng().gen_ascii_chars().take(10).collect();
+            path.push(s.as_slice());
+            // println!("create dir: {:?}", path);
+            match create_dir(&path) {
+                Ok(_) => Ok(MyTempDir { path: Some(path) }),
+                Err(e) => Err(e),
+            }
+        }
+
+        pub fn path(&self) -> &Path {
+            self.path.as_ref().unwrap()
+        }
+
+        fn cleanup_dir(&mut self) -> std::io::Result<()> {
+            match self.path {
+                Some(ref p) => fs::remove_dir_all(p),
+                None => Ok(())
+            }
+        }
+    }
+
+    impl Drop for MyTempDir {
+        fn drop(&mut self) {
+            // println!("delete dir: {:?}", self.path());
+            let _ = self.cleanup_dir();
+        }
+    }
 
     pub fn get_key(n: u32) -> String {
         format!("key{}", n)
@@ -72,8 +111,8 @@ mod test_utils {
         format!("data{}", n)
     }
 
-    pub fn setup_bench_db<'a>(num_rows: u32) -> (fs::TempDir, Environment) {
-        let dir = fs::TempDir::new("test").unwrap();
+    pub fn setup_bench_db<'a>(num_rows: u32) -> (MyTempDir, Environment) {
+        let dir = MyTempDir::new().unwrap();
         let env = Environment::new().open(dir.path()).unwrap();
 
         {

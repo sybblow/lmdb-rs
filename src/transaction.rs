@@ -579,7 +579,7 @@ mod test {
 
     #[bench]
     fn bench_get_rand(b: &mut Bencher) {
-        let n = 100u32;
+        let n = 10000u32;
         let (_dir, env) = setup_bench_db(n);
         let db = env.open_db(None).unwrap();
         let txn = env.begin_ro_txn().unwrap();
@@ -599,7 +599,7 @@ mod test {
 
     #[bench]
     fn bench_get_rand_raw(b: &mut Bencher) {
-        let n = 100u32;
+        let n = 10000u32;
         let (_dir, env) = setup_bench_db(n);
         let db = env.open_db(None).unwrap();
         let _txn = env.begin_ro_txn().unwrap();
@@ -630,7 +630,7 @@ mod test {
 
     #[bench]
     fn bench_put_rand(b: &mut Bencher) {
-        let n = 100u32;
+        let n = 10000u32;
         let (_dir, env) = setup_bench_db(0);
         let db = env.open_db(None).unwrap();
 
@@ -649,7 +649,7 @@ mod test {
 
     #[bench]
     fn bench_put_rand_raw(b: &mut Bencher) {
-        let n = 100u32;
+        let n = 10000u32;
         let (_dir, _env) = setup_bench_db(0);
         let db = _env.open_db(None).unwrap();
 
